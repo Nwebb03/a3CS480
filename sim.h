@@ -1,9 +1,8 @@
 #ifndef SIM_H
 #define SIM_H
-
+using namespace std;
 #include <vector>
-
-// Forward declarations to avoid heavy includes
+#include <iostream>
 class memoryManager;
 class requestGen;
 
@@ -41,7 +40,7 @@ void processRequest(memoryManager& memFirst,
                     Stats& stats);
 
 // Simulation driver
-void runSimulation(memoryManager& memFirst,
+vector<vector<int>> runSimulation(memoryManager& memFirst,
                    memoryManager& memBest,
                    requestGen& reqGen,
                    int numRequests,
