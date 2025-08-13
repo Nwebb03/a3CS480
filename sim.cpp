@@ -87,8 +87,10 @@ vector<vector<int>> runSimulation(memoryManager& memFirst,
                    requestGen& reqGen,
                    int numRequests,
                    Stats& stats){
-    vector<int> resultsBest;
-    vector<int> resultsFirst;
+    vector<int> fragmentsBest;
+    vector<int> fragmentsFirst;
+    vector<int> numNodesTraversedBest;
+    vector<int> numNodesTraversedFirst;
     vector<int> req;
     vector<vector<int>> results;
     int fragmentCountBest = 0;
@@ -99,18 +101,23 @@ vector<vector<int>> runSimulation(memoryManager& memFirst,
         for (int i = 0; i < numRequests; ++i) {
             req = reqGen.generateRequest();
             processRequest(memFirst, memBest, req, stats);
+            //Collect best fit statistics
+            numNodesTraversedBest.push_back(stats.numNodesTraversedBest);
+            fragmentsBest.push_back(memBest.fragment_count());
             fragmentCountBest = memBest.fragment_count();
             stats.totalFragmentsBest += fragmentCountBest;
-            resultsBest.push_back(fragmentCountBest);
+
+            //Collect first fit statistics
+            numNodesTraversedFirst.push_back(stats.numNodesTraversedFirst);
             fragmentCountFirst = memFirst.fragment_count();
-            resultsFirst.push_back(fragmentCountFirst);
+            fragmentsFirst.push_back(fragmentCountFirst);
             stats.totalFragmentsFirst += fragmentCountFirst;
         }
-        return {resultsFirst, resultsBest};
+        return {fragmentsFirst, fragmentsBest, numNodesTraversedFirst, numNodesTraversedBest};
     }
     catch (const std::exception& e) {
         std::cerr << "Error during simulation: " << e.what() << std::endl;
-        return {{}, {}};
+        return {{}, {}, {}, {}};
     }
 
 }
@@ -125,7 +132,19 @@ void printStats(const Stats& stats) {
     std::cout << "First-Fit Allocation Failures: " << stats.firstAllocationFailures << "\n";
     std::cout << "Best-Fit Allocation Failures: " << stats.bestAllocationFailures << "\n";
     std::cout << "First-Fit Fragment Count: " << stats.totalFragmentsFirst << "\n";
-    std::cout << "Best-Fit Fragment Count: " << stats.totalFragmentsBest << "\n";
+    std::cout << "Best-Fit Fragment Count: " << stats.totalFragmentsBest << "\n\n\n";
+    cout <<"======================================\n";
+    cout << "End of First-Fit Statistics\n";
+    cout << "Average First-Fit Fragment Count: " << (stats.totalFragmentsFirst / static_cast<double>(stats.numRequests)) << "\n";
+    cout << "Average First-Fit Nodes Traversed: " << (stats.numNodesTraversedFirst / static_cast<double>(stats.numRequests)) << "\n";
+    cout <<"Percentage of First-Fit Allocation Failures: " << (stats.firstAllocationFailures * 100.0 / stats.numAllocations) << "%\n";
+    cout <<"======================================\n";
+
+    cout << "Average Best-Fit Fragment Count: " << (stats.totalFragmentsBest / static_cast<double>(stats.numRequests)) << "\n";
+    cout << "Average Best-Fit Nodes Traversed: " << (stats.numNodesTraversedBest / static_cast<double>(stats.numRequests)) << "\n";
+    cout <<"Percentage of Best-Fit Allocation Failures: " << (stats.bestAllocationFailures * 100.0 / stats.numAllocations) << "%\n";
+    cout <<"======================================\n";
+
 }
 
 void writeResultsToFile(const vector<vector<int>>& results, const string& filename) {
@@ -136,9 +155,11 @@ void writeResultsToFile(const vector<vector<int>>& results, const string& filena
     }
     vector<int> firstFitResults = results[0];
     vector<int> bestFitResults = results[1];
-    fprintf(fp, "RequestID, FirstFitFragments, BestFitFragments\n");
+    vector<int> numNodesTraversedFirst = results[2];
+    vector<int> numNodesTraversedBest = results[3];
+    fprintf(fp, "RequestID, FirstFitFragments, BestFitFragments, FirstFitNodesTraversed, BestFitNodesTraversed\n");
     for (long unsigned int i = 0; i < firstFitResults.size(); ++i) {
-        fprintf(fp, "%lu, %d, %d\n", i, firstFitResults[i], bestFitResults[i]);
+        fprintf(fp, "%lu, %d, %d, %d, %d\n", i, firstFitResults[i], bestFitResults[i], numNodesTraversedFirst[i], numNodesTraversedBest[i]);
     }
 
 }
