@@ -3,6 +3,10 @@
 using namespace std;
 #include <vector>
 #include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
+
+
 class memoryManager;
 class requestGen;
 
