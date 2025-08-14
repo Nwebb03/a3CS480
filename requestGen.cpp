@@ -1,4 +1,13 @@
 #include "requestGen.h"
+//## Names
+//- Nate Webb cssc1467
+//- Noah Bakayou cssc1409
+
+//## Class Information
+//- CS480-02-Sum202
+
+//## Assignment Information
+//- Assignment #3 - Memory Allocation Simulation
 
 requestGen::requestGen(int maxPid, int minRequestSize, int maxRequestSize)
 {
@@ -23,38 +32,52 @@ requestGen::requestGen(int maxPid, int minRequestSize, int maxRequestSize)
 std::vector<int> requestGen::generateRequest() {
     int action = allocOrDeallocDist(gen);
     int processID;
+
+    // Guard against invalid states to avoid throwing
+    if (allocatedProcesses.empty() && availableProcesses.empty()) {
+        // No valid operation remains. Emit a deallocation for a non-existent PID 0
+        // so the simulator can continue and count a denied operation if desired.
+        return {1, 0, sizeDist(gen)};
+    }
+
+    // If nothing allocated, must allocate
     if (action == 1 && allocatedProcesses.empty()) {
-        // If no processes are allocated, we can only allocate
         action = 0;
     }
-    if (action == 0) {
-        //Ensure unique process ID for allocation
-        while (true) {
-            std::set<int>::iterator it = availableProcesses.begin();
-            if (availableProcesses.empty()) {
-                throw std::runtime_error("No available processes for allocation.");
-            }
-            std::advance(it, processDist(gen) % availableProcesses.size()); // Move iterator to the random index
-            processID = *it;
-            // Check if the process ID is already allocated
-            if (allocatedProcesses.find(processID) == allocatedProcesses.end()) {
-                allocatedProcesses.insert(processID);
-                break;
+    // If no new processes are available, must deallocate
+    if (action == 0 && availableProcesses.empty()) {
+        action = 1;
+    }
 
-            }
+    if (action == 0) {
+        // Ensure unique process ID for allocation (use each PID at most once overall)
+        if (availableProcesses.empty()) {
+            // Fallback: force a deallocation of some existing process below
+            action = 1;
+        } else {
+            std::set<int>::iterator it = availableProcesses.begin();
+            std::advance(it, processDist(gen) % availableProcesses.size()); // Move iterator to a random index
+            processID = *it;
+            // Consume this PID permanently so it will never be reused after deallocation
+            availableProcesses.erase(it);
+            allocatedProcesses.insert(processID);
+            int numUnits = sizeDist(gen);
+            return {0, processID, numUnits};
         }
     }
-    else {
-        // Choose a process ID from the allocated processes
-        if (allocatedProcesses.empty()) {
-            throw std::runtime_error("No processes allocated for deallocation.");
-        }
-        // Randomly select a process ID from the allocated set
+
+    // Deallocation path
+    // Choose a process ID from the allocated processes
+    if (allocatedProcesses.empty()) {
+        // Nothing to deallocate; return a benign deallocation request for PID 0
+        return {1, 0, sizeDist(gen)};
+    }
+    // Randomly select a process ID from the allocated set
+    {
         std::set<int>::iterator it = std::next(allocatedProcesses.begin(), processDist(gen) % allocatedProcesses.size());
         processID = *it;
-        allocatedProcesses.erase(it); // Remove the process ID from the set
+        allocatedProcesses.erase(it); // Remove the process ID from the set (do not re-add to availableProcesses)
+        int numUnits = sizeDist(gen);
+        return {1, processID, numUnits};
     }
-    int numUnits = sizeDist(gen);
-    // Return a vector containing the action, process ID, and number of units
-    return {action, processID, numUnits};
 }

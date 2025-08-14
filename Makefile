@@ -13,5 +13,6 @@ $(TARGET): $(OBJECTS)       # Link object files to create the executable
 %.o: %.cpp                  # Compile each .cpp file to a .o file
 	$(CXX) $(CXXFLAGS) -c $<
 
+.PHONY: clean
 clean:                      # Remove object files and the executable
 	rm -f $(OBJECTS) $(TARGET)

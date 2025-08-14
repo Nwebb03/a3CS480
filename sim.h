@@ -1,10 +1,16 @@
 #ifndef SIM_H
 #define SIM_H
-using namespace std;
+//## Names
+//- Nate Webb cssc1467
+//- Noah Bakayou cssc1409
+
+//## Class Information
+//- CS480-02-Sum202
+
+//## Assignment Information
+//- Assignment #3 - Memory Allocation Simulation
 #include <vector>
 #include <iostream>
-#include <fcntl.h>
-#include <unistd.h>
 
 
 class memoryManager;
@@ -44,7 +50,7 @@ void processRequest(memoryManager& memFirst,
                     Stats& stats);
 
 // Simulation driver
-vector<vector<int>> runSimulation(memoryManager& memFirst,
+std::vector<std::vector<int>> runSimulation(memoryManager& memFirst,
                    memoryManager& memBest,
                    requestGen& reqGen,
                    int numRequests,
@@ -54,3 +60,4 @@ vector<vector<int>> runSimulation(memoryManager& memFirst,
 void printStats(const Stats& stats);
 
 #endif // SIM_H
+ 

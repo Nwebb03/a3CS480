@@ -1,0 +1,89 @@
+## Names
+- Nate Webb cssc1467
+- Noah Bakayou cssc1409
+
+## Class Information
+- CS480-02-Sum202
+
+## Assignment Information
+- Assignment #3 - Memory Allocation Simulation
+
+---
+
+## File Manifest
+- Makefile
+- sim.cpp (Main)
+- sim.h
+- memoryManager.cpp
+- memoryManager.h
+- requestGen.cpp
+- requestGen.h
+- sim (Generated on compile)
+- *.o (Generated on compile)
+- a3Analysis/ (CSV + graphs)
+  - results.csv
+  - fragments_vs_request_id.png
+  - cumulative_fragments.png
+  - nodes_traversed.png
+
+---
+
+## Compile Instructions
+- Run `make` in the project directory to build the program.
+- Generates an executable named `sim`.
+- Run `make clean` to remove objects and the executable.
+
+---
+
+## Operating Instructions
+- Run `./sim`.
+- No command-line arguments.
+- The program simulates 10,000 requests and prints final statistics for First Fit and Best Fit.
+- A CSV `results.csv` is also produced for graphing.
+
+---
+
+## Background
+- Memory size: 256 KB divided into 2 KB units → 128 units total.
+- Requests: processes request 3–10 units.
+- Techniques: First Fit and Best Fit managed via a linked-list of `memoryBlock`s with coalescing.
+- API per spec: `allocate_mem`, `deallocate_mem`, `fragment_count`.
+- Per assignment rule, each process ID is allocated at most once overall.
+
+---
+
+## Simulation Setup and Parameters
+- Requests: 10,000.
+- Process IDs: up to 10,000 unique PIDs; each used at most once.
+- Allocation requests include a number of units uniformly distributed in [3,10].
+- `fragment_count` counts holes of size 1 or 2 units after coalescing.
+- Metrics collected for each technique:
+  - Average external fragments per request.
+  - Average nodes traversed per allocation.
+  - Percentage of allocation requests denied.
+
+---
+
+## Findings (example: your run will vary)
+- End of First Fit Allocation
+  - Average External Fragments Each Request: ~3.1
+  - Average Nodes Transversed Each Allocation: ~6.6
+  - Percentage Allocation Requests Denied Overall: ~43%
+- End of Best Fit Allocation
+  - Average External Fragments Each Request: ~3.3
+  - Average Nodes Transversed Each Allocation: ~12.6
+  - Percentage Allocation Requests Denied Overall: ~43%
+
+Interpretation:
+- Best Fit tends to traverse more nodes per allocation than First Fit.
+- Fragmentation behavior depends on request patterns. In the shown run, First Fit had slightly fewer fragments on average.
+- High denial rates indicate memory pressure with the chosen parameters.
+
+---
+
+## Lessons Learned
+- Linked-list memory management with coalescing is sensitive to allocation patterns.
+- Best Fit can increase traversal cost while not always reducing fragmentation.
+- Accurate stats require careful definitions (per-allocation vs per-request).
+
+

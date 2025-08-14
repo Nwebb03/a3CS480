@@ -1,5 +1,14 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
+//## Names
+//- Nate Webb cssc1467
+//- Noah Bakayou cssc1409
+
+//## Class Information
+//- CS480-02-Sum202
+
+//## Assignment Information
+//- Assignment #3 - Memory Allocation Simulation
 
 #include <list>
 #include <cstddef> // for size_t

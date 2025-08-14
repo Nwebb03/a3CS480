@@ -1,4 +1,13 @@
 #include "memoryManager.h"
+//## Names
+//- Nate Webb cssc1467
+//- Noah Bakayou cssc1409
+
+//## Class Information
+//- CS480-02-Sum202
+
+//## Assignment Information
+//- Assignment #3 - Memory Allocation Simulation
 
 memoryManager::memoryManager(int numUnits, Policy policyType) {
     if (numUnits <= 0) {
@@ -43,13 +52,18 @@ int memoryManager::allocate_mem(int process_id, int num_units) {
 
 int memoryManager::deallocate_mem(int process_id) {
     try{
+        bool found = false;
         iterator it = memoryBlocks.begin();
         while (it != memoryBlocks.end()) {
             if (it->process_id == process_id) {
                 it->process_id = -1; // Mark as free
                 it->free = true; // Set block as free
+                found = true;
             }
             ++it;
+        }
+        if (!found) {
+            return -1;
         }
         coalesce(); // Merge adjacent free blocks after deallocation
         return 1;
