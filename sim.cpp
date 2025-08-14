@@ -167,7 +167,7 @@ void writeResultsToFile(const vector<vector<int>>& results, const string& filena
 int main() {
     try {
         const int numUnits    = 128;   // 256KB / 2KB = 128 units
-        const int numRequests = 10000;
+        const int numRequests = 1000000;
         const int numProcs    = numRequests; // 1 request per process
         const int minUnits    = 3;
         const int maxUnits    = 10;
