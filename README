@@ -1,89 +1,173 @@
-## Names
-- Nate Webb cssc1467
-- Noah Bakayou cssc1409
+# README
 
-## Class Information
-- CS480-02-Sum202
-
-## Assignment Information
-- Assignment #3 - Memory Allocation Simulation
+**Names:** Nate Webb, Noah Bakayou  
+**Class Account Usernames:** cssc1467, cssc1409  
+**Class Information:** CS480-02-Sum202  
+**Assignment Information:** Assignment #3 – Memory Allocation Simulation  
 
 ---
 
 ## File Manifest
-- Makefile
-- sim.cpp (Main)
-- sim.h
-- memoryManager.cpp
-- memoryManager.h
-- requestGen.cpp
-- requestGen.h
-- sim (Generated on compile)
-- *.o (Generated on compile)
-- a3Analysis/ (CSV + graphs)
-  - results.csv
-  - fragments_vs_request_id.png
-  - cumulative_fragments.png
-  - nodes_traversed.png
+- `Makefile`
+- `sim.cpp` (Main)
+- `sim.h`
+- `memoryManager.cpp`
+- `memoryManager.h`
+- `requestGen.cpp`
+- `requestGen.h`
+- `README`
+- `sim` (Generated on compile)
+- `*.o` (Generated on compile)
+- `results.csv` (Generated on run)
+- `a3Analysis/` (CSV + graphs directory)
+  - `results.csv`
+  - `fragments_vs_request_id.png`
+  - `cumulative_fragments.png`
+  - `nodes_traversed.png`
+  - `graphResults.py`
 
 ---
 
 ## Compile Instructions
-- Run `make` in the project directory to build the program.
-- Generates an executable named `sim`.
-- Run `make clean` to remove objects and the executable.
+Run:
+```bash
+make
+```
+Generates an executable named `sim`.
+
+Clean build artifacts:
+```bash
+make clean
+```
 
 ---
 
 ## Operating Instructions
-- Run `./sim`.
-- No command-line arguments.
-- The program simulates 10,000 requests and prints final statistics for First Fit and Best Fit.
-- A CSV `results.csv` is also produced for graphing.
+Run:
+```bash
+./sim
+```
+- No command-line arguments required.  
+- Simulates 10,000 requests and prints final statistics for First Fit and Best Fit.  
+- Produces `results.csv` for potential graphing analysis.
 
 ---
 
-## Background
-- Memory size: 256 KB divided into 2 KB units → 128 units total.
-- Requests: processes request 3–10 units.
-- Techniques: First Fit and Best Fit managed via a linked-list of `memoryBlock`s with coalescing.
-- API per spec: `allocate_mem`, `deallocate_mem`, `fragment_count`.
-- Per assignment rule, each process ID is allocated at most once overall.
+## Novel/Significant Design Decisions
+- Separate `Policy` enum (`FirstFit`, `BestFit`) for algorithm selection instead of duplicate classes.
+- Automatic coalescing after every deallocation.
+- One-time-per-process allocation enforced through permanent PID consumption in request generator.
+- Fixed random seed (`1`) for reproducible results.
+- Structured statistics collection for both per-request and per-allocation metrics.
 
 ---
 
-## Simulation Setup and Parameters
-- Requests: 10,000.
-- Process IDs: up to 10,000 unique PIDs; each used at most once.
-- Allocation requests include a number of units uniformly distributed in [3,10].
-- `fragment_count` counts holes of size 1 or 2 units after coalescing.
-- Metrics collected for each technique:
-  - Average external fragments per request.
-  - Average nodes traversed per allocation.
-  - Percentage of allocation requests denied.
+## Extra Features
+- CSV output for analysis and graphing.
+- Python-based graph generation with three visualization types.
+- Comprehensive error handling with `try-catch` blocks.
+- Real-time fragment counting and accumulation tracking.
+- Automatic CSV file closure to ensure data integrity.
 
 ---
 
-## Findings (example: your run will vary)
-- End of First Fit Allocation
-  - Average External Fragments Each Request: ~3.1
-  - Average Nodes Transversed Each Allocation: ~6.6
-  - Percentage Allocation Requests Denied Overall: ~43%
-- End of Best Fit Allocation
-  - Average External Fragments Each Request: ~3.3
-  - Average Nodes Transversed Each Allocation: ~12.6
-  - Percentage Allocation Requests Denied Overall: ~43%
-
-Interpretation:
-- Best Fit tends to traverse more nodes per allocation than First Fit.
-- Fragmentation behavior depends on request patterns. In the shown run, First Fit had slightly fewer fragments on average.
-- High denial rates indicate memory pressure with the chosen parameters.
+## Known Deficiencies or Bugs
+None.  
+Compiles and runs successfully on both local and Edoras environments, producing output matching specifications.
 
 ---
 
 ## Lessons Learned
-- Linked-list memory management with coalescing is sensitive to allocation patterns.
-- Best Fit can increase traversal cost while not always reducing fragmentation.
-- Accurate stats require careful definitions (per-allocation vs per-request).
+- Linked-list memory management requires careful pointer handling and coalescing logic.
+- Performance precision depends on correct metric definitions.
+- Theoretical advantages may not always translate to practical gains.
+- Random workload generation significantly influences results.
+- Exact specification compliance is critical for formatting and return semantics.
 
+---
 
+## Graphs
+Located in `a3Analysis/`:
+
+1. **Fragment Count Over Time** (`fragments_vs_request_id.png`)  
+   ![Fragments vs Request ID](a3Analysis/fragments_vs_request_id.png)  
+   Shows fragmentation evolution for both algorithms. Oscillation reflects allocation/deallocation cycles.
+
+2. **Nodes Traversed Per Request** (`nodes_traversed.png`)  
+   ![Nodes Traversed](a3Analysis/nodes_traversed.png)  
+   Highlights computational cost. Best Fit traverses the entire free list; First Fit stops early.
+
+3. **Cumulative Fragment Accumulation** (`cumulative_fragments.png`)  
+   ![Cumulative Fragments](a3Analysis/cumulative_fragments.png)  
+   Shows net fragmentation trend despite coalescing.
+
+---
+
+## Background
+
+### Algorithm Descriptions
+- **First Fit:** Allocates in the first free block large enough. Splits if block is larger than needed.
+- **Best Fit:** Chooses the smallest suitable free block. Minimizes waste but requires full list traversal.
+
+### Simulation System Design
+- **Memory Model:** 256 KB total, divided into 128 × 2 KB units.
+- **Data Structure:** Linked list of `memoryBlock` structures.
+- **Coalescing:** Automatic after each deallocation.
+- **Request Generation:** MT19937 RNG, fixed seed `1`.
+- **Process ID Management:** Each PID allocated only once.
+
+### Configuration
+- Total units: 128 (256KB ÷ 2KB)
+- Requests: 10,000
+- Request size: 3–10 units (uniform)
+- Allocation/deallocation probability: 50/50
+- Fragment: Free block of size 1 or 2 units
+- Seed: `1`
+
+---
+
+## Findings
+
+### Current Simulation Results
+**First Fit Allocation:**
+- Average External Fragments Each Request: 3.116100
+- Average Nodes Transversed Each Allocation: 6.631264
+- Percentage Allocation Requests Denied Overall: 43.381913%
+
+**Best Fit Allocation:**
+- Average External Fragments Each Request: 3.316900
+- Average Nodes Transversed Each Allocation: 12.641046
+- Percentage Allocation Requests Denied Overall: 42.862847%
+
+### What the Numbers Tell Us
+The results were pretty surprising to me. I expected Best Fit to be way better at reducing fragmentation, but it actually created MORE fragments on average (3.32 vs 3.12). That was definitely not what I thought would happen based on what we learned in class about Best Fit being more "space efficient."
+
+The performance difference is huge though. First Fit only needed to check about 6.6 nodes per allocation while Best Fit had to check 12.6 nodes. That's almost double the work. This makes sense though because Best Fit has to look at every single free block to find the "best" one, while First Fit just stops at the first block that works.
+
+Both algorithms failed a decent amount, over 40% of allocation requests got denied. This shows our simulation is pretty harsh on memory. The 10,000 unique process IDs rule means once a process gets deallocated, that ID is gone forever, so we're constantly running out of available processes and memory gets really fragmented.
+
+### What This Means
+Looking at the graphs, you can see the fragment count bouncing up and down throughout the simulation. This happens because we're constantly allocating and deallocating memory. The cumulative graph shows that even with coalescing (merging free blocks), fragments just keep building up over time.
+
+The nodes traversed graph clearly shows Best Fit doing way more work. The way I thought about it is like the difference between grabbing the first parking spot you see versus driving around the whole parking lot to find the perfect spot. I learned that sometimes "good enough" is actually the better approach.
+
+### Why First Fit Won
+I think First Fit performed better because our simulation creates a really stressful memory environment. When memory is tight and you're under pressure, speed matters more than finding the absolute perfect fit. Best Fit's strategy of being picky actually backfired because it creates tiny leftover fragments that are too small to be useful.
+
+This taught me that theoretical "optimal" doesn't always mean practical "better." In real systems, you have to consider the whole system, not just space efficiency but also time efficiency and how the algorithm behaves under stress.
+
+### Conclusions Based on This Data Set
+1. Under high memory pressure, First Fit's speed advantage outweighs Best Fit's theoretical space efficiency
+2. The "better" algorithm depends heavily on workload characteristics and memory pressure levels  
+3. Simple metrics like "smallest fit" don't always predict real-world fragmentation behavior under stress
+4. Our one-time PID allocation rule creates an increasingly difficult environment that may not reflect typical OS behavior
+
+---
+
+## Recommendations for Future Runs
+1. **Variable Memory Pressure** – Test with 64, 256, 512 units.  
+2. **Request Size Distribution Studies** – Skewed, bimodal, real-world profiles.  
+3. **Alternative Strategies** – Next Fit, Worst Fit, Quick Fit.  
+4. **Dynamic Workloads** – Bursty patterns, process lifetimes, application-specific.  
+5. **Advanced Metrics** – Time-to-fragmentation, utilization efficiency, largest block tracking, request wait times.  
+6. **Policy Variations** – PID reuse, allocation priorities, periodic compaction.
